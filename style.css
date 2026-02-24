@@ -1,0 +1,910 @@
+/* ================================================================
+   STYLE.CSS — Professional Card-Based To-Do App
+   
+   DESIGN: Everything lives inside ONE big card.
+   The card is divided into neat sections:
+   
+   ┌─────────────────────────────────┐
+   │  🟦 HEADER CARD  (title+stats) │
+   ├─────────────────────────────────┤
+   │  ➕ ADD TASK section            │
+   ├─────────────────────────────────┤
+   │  🔘 FILTER TABS                 │
+   ├─────────────────────────────────┤
+   │  📋 TASK LIST                   │
+   │   ┌───────────────────────────┐ │
+   │   │ ☐  Task 1          ✏ 🗑  │ │
+   │   └───────────────────────────┘ │
+   │   ┌───────────────────────────┐ │
+   │   │ ☑  Task 2 (done)   ✏ 🗑  │ │
+   │   └───────────────────────────┘ │
+   ├─────────────────────────────────┤
+   │  🧹 FOOTER (clear completed)   │
+   └─────────────────────────────────┘
+
+   TABLE OF CONTENTS:
+   1.  Google Fonts import
+   2.  CSS Variables
+   3.  Reset
+   4.  Body (page background)
+   5.  Main Card (.app-card)
+   6.  Header Section (inside card)
+   7.  Stats Row (inside header)
+   8.  Divider Line
+   9.  Add Task Section
+   10. Filter Tabs
+   11. Task List Container
+   12. Task Item (each task card)
+   13. Checkbox
+   14. Task Text
+   15. Edit Input
+   16. Action Buttons
+   17. Empty State
+   18. Card Footer
+   19. Animations
+   20. Responsive (mobile)
+================================================================ */
+
+
+
+
+/* ================================================================
+   SECTION 1 — GOOGLE FONTS IMPORT
+   ----------------------------------------------------------------
+   We load two fonts from Google Fonts:
+   - "Nunito" for all body text (rounded, friendly, very readable)
+   - "Playfair Display" for the title (elegant serif)
+   
+   @import must ALWAYS be the very first line in a CSS file.
+================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+
+
+
+/* ================================================================
+   SECTION 2 — CSS VARIABLES
+   ----------------------------------------------------------------
+   Think of variables as "named settings" for the whole app.
+   Change a value here → it updates everywhere it's used.
+
+   Syntax:
+     Define:  --variable-name: value;
+     Use:     property: var(--variable-name);
+================================================================ */
+
+:root {
+
+  /* ── PAGE BACKGROUND ── */
+  --page-bg: #253352;          /* very dark navy — makes the card pop */
+
+  /* ── MAIN CARD ── */
+  --card-bg: #1E293B;          /* dark blue-gray — the card background */
+  --card-border: #334155;      /* slightly lighter border for the card */
+
+  /* ── HEADER SECTION (inside the card) ── */
+  --header-bg: #534d8f;        /* vivid indigo — bold header */
+  --header-bg2: #6e61c1;       /* purple — header gradient end color */
+
+  /* ── INNER TASK CARDS ── */
+  --task-bg: #273548;          /* slightly lighter than card — task background */
+  --task-border: #334155;      /* task border */
+  --task-hover: #2E3F55;       /* slightly lighter on hover */
+
+  /* ── COLORS ── */
+  --accent: #6366F1;           /* indigo — buttons and highlights */
+  --accent-dark: #4F46E5;      /* darker indigo — hover state */
+  --accent-soft: rgba(99, 102, 241, 0.15); /* transparent indigo — soft bg */
+
+  --success: #10B981;          /* emerald green — completed tasks */
+  --success-soft: rgba(16, 185, 129, 0.12);
+  --success-border: rgba(16, 185, 129, 0.30);
+
+  --danger: #F87171;           /* soft red — delete hover */
+  --danger-soft: rgba(248, 113, 113, 0.12);
+
+  --warning: #FBBF24;          /* amber — edit hover */
+  --warning-soft: rgba(251, 191, 36, 0.12);
+
+  /* ── TEXT ── */
+  --text-primary: #F1F5F9;     /* near-white — main text */
+  --text-secondary: #94A3B8;   /* slate gray — secondary text */
+  --text-muted: #64748B;       /* darker gray — placeholder / hints */
+
+  /* ── BORDER & DIVIDERS ── */
+  --divider: #2D3F55;          /* subtle dividing line */
+
+  /* ── SHADOWS ── */
+  /* box-shadow format: X  Y  blur  spread  color */
+  --shadow-card: 0 25px 60px rgba(0, 0, 0, 0.5);
+  --shadow-task: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-task-hover: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --glow: 0 0 0 3px rgba(99, 102, 241, 0.25);  /* indigo glow ring */
+
+  /* ── BORDER RADIUS (corner roundness) ──
+     Higher number = more rounded */
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   18px;
+  --r-xl:   24px;
+  --r-card: 28px;    /* the main card's corner radius */
+  --r-pill: 999px;   /* fully pill-shaped */
+}
+
+
+
+
+/* ================================================================
+   SECTION 3 — RESET
+   ----------------------------------------------------------------
+   Browsers have their own default styles (margins, paddings).
+   We clear all of them so WE control every pixel.
+
+   * = "target every single element on the page"
+   box-sizing: border-box = padding is INCLUDED in the width
+   (so width:200px stays 200px even with padding:20px inside)
+================================================================ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
+
+/* ================================================================
+   SECTION 4 — BODY (The full page)
+   ----------------------------------------------------------------
+   The <body> is the entire visible webpage.
+
+   We give it a very dark background so the card stands out.
+   
+   display: flex + place-items: center perfectly centers
+   the card both horizontally AND vertically.
+   
+   min-height: 100vh = at least as tall as the full screen
+   (vh = viewport height, 100vh = 100% screen height)
+================================================================ */
+
+body {
+  font-family: 'Nunito', sans-serif;
+
+  /* Dark background so the card really pops */
+  background-color: var(--page-bg);
+
+  /* Subtle grid pattern overlay for texture */
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;   /* size of each grid square */
+
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;    /* center horizontally */
+  align-items: flex-start;    /* align to top */
+  padding: 40px 16px 80px;
+}
+
+
+
+
+/* ================================================================
+   SECTION 5 — MAIN APP CARD (.app-wrapper)
+   ----------------------------------------------------------------
+   THIS is the big card that contains EVERYTHING.
+
+   It has a dark background, rounded corners, and a strong shadow
+   to make it feel like it's floating above the page.
+
+   width: 100%        = fill available width
+   max-width: 520px   = but never wider than 520px
+   overflow: hidden   = content can't "bleed" outside the card
+================================================================ */
+
+.app-wrapper {
+  width: 100%;
+  max-width: 520px;
+
+  background-color: var(--card-bg);   /* dark blue-gray card */
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);        /* very rounded corners */
+  box-shadow: var(--shadow-card);      /* large shadow = appears elevated */
+  overflow: hidden;                    /* keeps header rounded at top */
+}
+
+
+
+
+/* ================================================================
+   SECTION 6 — HEADER SECTION (inside the top of the card)
+   ----------------------------------------------------------------
+   This is the colorful top section of the card.
+   It has a gradient background (two colors blending together).
+
+   padding: top/bottom | left/right
+   
+   The header sits directly inside .app-wrapper so it
+   inherits the card's top border-radius naturally.
+================================================================ */
+
+.app-header {
+  /* Gradient from indigo to purple, going diagonally */
+  background: linear-gradient(135deg, var(--header-bg) 0%, var(--header-bg2) 100%);
+
+  padding: 32px 28px 28px;
+
+  /* Relative positioning so we can add decorative circles inside */
+  position: relative;
+  overflow: hidden;          /* clip the decorative circles */
+}
+
+/* Decorative circle 1 — a big blurry translucent circle
+   ::before creates a fake element BEFORE the header's content */
+.app-header::before {
+  content: '';               /* required for pseudo-elements */
+  position: absolute;        /* positioned relative to .app-header */
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.08); /* white at 8% opacity */
+  border-radius: 50%;        /* circle */
+}
+
+/* Decorative circle 2 — smaller circle bottom-left */
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: 20px;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+}
+
+/* The "My Tasks" title */
+.app-title {
+  font-family: 'Playfair Display', serif;   /* elegant display font */
+  font-size: 2rem;
+  font-weight: 700;
+  font-style: italic;        /* italic gives it personality */
+  color: #FFFFFF;
+  line-height: 1;
+  letter-spacing: -0.5px;
+
+  position: relative;        /* sits above the ::before ::after circles */
+  z-index: 1;
+}
+
+/* The task remaining counter below the title */
+.task-counter {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.70);   /* white at 70% opacity */
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+
+
+
+/* ================================================================
+   SECTION 7 — STATS ROW (3 small stat boxes inside the header)
+   ----------------------------------------------------------------
+   Shows: Total | Active | Done counts
+   
+   display: flex with gap puts 3 boxes side by side.
+   Each box takes equal width using flex:1.
+================================================================ */
+
+.stats-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Each individual stat box */
+.stat-box {
+  flex: 1;                   /* each box gets equal width */
+  background: rgba(255, 255, 255, 0.12);  /* white at 12% — semi-transparent */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  text-align: center;
+
+  /* Frosted glass effect */
+  backdrop-filter: blur(10px);
+}
+
+.stat-number {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 600;
+  text-transform: uppercase;    /* ALL CAPS */
+  letter-spacing: 0.08em;       /* slightly spread letters */
+  margin-top: 3px;
+}
+
+
+
+
+/* ================================================================
+   SECTION 8 — MAIN CONTENT AREA (below the header)
+   ----------------------------------------------------------------
+   This wraps everything below the header: input, filters, tasks.
+   Padding keeps content away from the card edges.
+================================================================ */
+
+.main-content {
+  padding: 24px 22px;
+}
+
+
+
+
+/* ================================================================
+   SECTION 9 — ADD TASK SECTION (Input box + Add button)
+   ----------------------------------------------------------------
+   display: flex puts input and button SIDE BY SIDE.
+   
+   The input has flex:1 = takes ALL remaining width.
+   The button stays its natural size.
+================================================================ */
+
+.add-task-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* ── TEXT INPUT ── */
+.task-input {
+  flex: 1;    /* fills all remaining space — pushes button to the right */
+
+  padding: 12px 16px;
+  background: var(--task-bg);         /* dark task color */
+  border: 1.5px solid var(--task-border);
+  border-radius: var(--r-md);
+
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);         /* near-white text */
+
+  outline: none;    /* remove browser's default focus ring */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* When user clicks/focuses on the input */
+.task-input:focus {
+  border-color: var(--accent);         /* indigo border */
+  box-shadow: var(--glow);             /* soft indigo glow */
+}
+
+/* The gray hint text inside empty input */
+.task-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── ADD BUTTON ── */
+.add-btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--accent), var(--header-bg2));
+  color: white;
+  border: none;
+  border-radius: var(--r-md);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;        /* hand cursor on hover */
+  white-space: nowrap;    /* prevents button text from wrapping */
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  letter-spacing: 0.02em;
+}
+
+.add-btn:hover {
+  opacity: 0.88;
+}
+
+/* Tiny press-down effect on click */
+.add-btn:active {
+  transform: scale(0.96);
+}
+
+
+
+
+/* ================================================================
+   SECTION 10 — FILTER TABS (All / Active / Done)
+   ----------------------------------------------------------------
+   A tab bar to switch between task views.
+   
+   The outer .filter-bar is the gray container/background.
+   The inner .filter-btn buttons sit inside it.
+   The active button looks "raised" with a white background.
+================================================================ */
+
+/* Outer pill-shaped container */
+.filter-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--task-bg);   /* dark background behind the tabs */
+  border: 1px solid var(--task-border);
+  border-radius: var(--r-pill);
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+/* Individual tab button */
+.filter-btn {
+  flex: 1;                 /* all buttons get equal width */
+  padding: 7px 12px;
+  border: none;
+  border-radius: var(--r-pill);   /* pill inside the pill */
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  color: var(--text-primary);
+}
+
+/* The SELECTED tab — looks raised and highlighted */
+.filter-btn.active {
+  background: var(--accent);      /* filled indigo */
+  color: white;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);  /* indigo shadow */
+}
+
+
+
+
+/* ================================================================
+   SECTION 11 — TASK LIST CONTAINER
+   ----------------------------------------------------------------
+   The <ul> that holds all task items.
+   
+   list-style: none — removes default bullet points
+   flex column — stacks tasks vertically
+   gap — space between tasks
+   
+   max-height + overflow-y: auto — if tasks overflow,
+   show a scrollbar instead of pushing the card taller.
+================================================================ */
+
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;   /* stack tasks top to bottom */
+  gap: 8px;
+
+  max-height: 380px;        /* card won't grow taller than this */
+  overflow-y: auto;         /* show scrollbar if content overflows */
+
+  /* Custom scrollbar styling (works in Chrome/Edge) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-border) transparent;
+  padding-right: 2px;       /* tiny gap so scrollbar doesn't overlap tasks */
+}
+
+/* Scrollbar track (the background rail) */
+.task-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.task-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Scrollbar thumb (the draggable part) */
+.task-list::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: var(--r-pill);
+}
+
+
+
+
+/* ================================================================
+   SECTION 12 — TASK ITEM (Each individual task card)
+   ----------------------------------------------------------------
+   Each task is an <li> styled as a mini card.
+   
+   display: flex puts checkbox, text, and buttons in a ROW.
+   align-items: center vertically centers them.
+   
+   The task cards sit INSIDE the main card — card within a card!
+================================================================ */
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 13px 14px;
+  background: var(--task-bg);
+  border: 1px solid var(--task-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-task);
+
+  /* Smooth transitions when properties change */
+  transition: background-color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease,
+              opacity 0.2s ease;
+
+  /* Play the slide-in animation when this task is added to the page */
+  animation: slideIn 0.3s ease;
+}
+
+.task-item:hover {
+  background: var(--task-hover);
+  border-color: #3D526A;
+  box-shadow: var(--shadow-task-hover);
+}
+
+/* COMPLETED task — green tint */
+.task-item.done {
+  background: var(--success-soft);    /* pale green tint */
+  border-color: var(--success-border); /* green border */
+  opacity: 0.80;                       /* slightly faded */
+}
+
+
+
+
+/* ================================================================
+   SECTION 13 — CHECKBOX (custom round checkbox)
+   ----------------------------------------------------------------
+   We hide the default browser checkbox (ugly, unstyled).
+   We replace it with our own circle made from a <div>.
+   
+   When task is .done:
+   - The circle fills with green
+   - A ✓ checkmark appears inside it
+================================================================ */
+
+/* Step 1: Hide the real browser checkbox completely */
+.task-item input[type="checkbox"] {
+  display: none;
+}
+
+/* Step 2: Our custom circle "checkbox" */
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;       /* prevents flexbox from squishing it */
+  border: 2px solid var(--task-border);
+  border-radius: 50%;    /* 50% = perfect circle */
+  background: transparent;
+  cursor: pointer;
+
+  /* Center the checkmark inside using Flexbox */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s ease;
+}
+
+.custom-checkbox:hover {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+/* Step 3: When task is done → fill circle green */
+.task-item.done .custom-checkbox {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+/* The ✓ checkmark — made with ::after pseudo-element
+   Starts invisible, fades in when done */
+.custom-checkbox::after {
+  content: '';
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.task-item.done .custom-checkbox::after {
+  content: '✓';
+  opacity: 1;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+
+
+
+/* ================================================================
+   SECTION 14 — TASK TEXT
+   ----------------------------------------------------------------
+   flex: 1 is crucial here — it makes the text fill ALL
+   remaining space in the row, pushing buttons to the far right.
+================================================================ */
+
+.task-text {
+  flex: 1;               /* fill all remaining width */
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+  word-break: break-word;   /* wraps long words instead of overflowing */
+}
+
+/* When task is done — strikethrough + gray text */
+.task-item.done .task-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+
+
+
+/* ================================================================
+   SECTION 15 — EDIT INPUT
+   ----------------------------------------------------------------
+   When the user clicks ✏️, JavaScript replaces .task-text
+   with this input field. It takes the same flex:1 space.
+================================================================ */
+
+.edit-input {
+  flex: 1;
+  padding: 4px 10px;
+  background: rgba(99, 102, 241, 0.10);  /* very faint indigo */
+  border: 1.5px solid var(--accent);      /* indigo border */
+  border-radius: var(--r-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  outline: none;
+}
+
+
+
+
+/* ================================================================
+   SECTION 16 — ACTION BUTTONS (Edit + Delete)
+   ----------------------------------------------------------------
+   Small icon buttons on the right side of each task.
+   
+   They start INVISIBLE (opacity: 0).
+   They APPEAR when you hover over the parent task.
+   
+   Why opacity instead of display:none?
+   → opacity:0 keeps the space reserved, so the layout doesn't jump.
+   → display:none would remove the space entirely.
+================================================================ */
+
+.task-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;             /* invisible by default */
+  transition: opacity 0.2s ease;
+}
+
+/* Show buttons when hovering the parent .task-item */
+.task-item:hover .task-actions {
+  opacity: 1;
+}
+
+/* Base style for both edit and delete buttons */
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+/* Edit button → amber glow on hover */
+.edit-btn:hover {
+  background-color: var(--warning-soft);
+}
+
+/* Delete button → red glow on hover */
+.delete-btn:hover {
+  background-color: var(--danger-soft);
+}
+
+
+
+
+/* ================================================================
+   SECTION 17 — EMPTY STATE
+   ----------------------------------------------------------------
+   The "No tasks here" message.
+   
+   Hidden by default with display:none.
+   JavaScript adds class "visible" to show it.
+================================================================ */
+
+.empty-state {
+  display: none;          /* hidden until JavaScript shows it */
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-muted);
+}
+
+/* JavaScript adds this class to reveal it */
+.empty-state.visible {
+  display: block;
+}
+
+.empty-icon {
+  display: block;
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+
+
+
+/* ================================================================
+   SECTION 18 — CARD FOOTER
+   ----------------------------------------------------------------
+   A thin dividing line + the "Clear Completed" button.
+   Sits at the very bottom of the main content area.
+================================================================ */
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;   /* push button to the right */
+  margin-top: 18px;
+  padding-top: 16px;
+
+  /* A line on top of the footer to separate it from tasks */
+  border-top: 1px solid var(--divider);
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+  padding: 4px 0;
+}
+
+.clear-btn:hover {
+  color: var(--danger);    /* turns soft red on hover */
+}
+
+
+
+
+/* ================================================================
+   SECTION 19 — ANIMATIONS
+   ----------------------------------------------------------------
+   @keyframes defines a named animation sequence.
+   
+   "slideIn" = task starts invisible + slightly above position,
+   then slides down into place and fades in.
+   
+   It's triggered in .task-item with:
+   animation: slideIn 0.3s ease;
+================================================================ */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);   /* 8px above normal position */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);      /* normal position */
+  }
+}
+
+/* Card fades in when the page loads */
+.app-wrapper {
+  animation: cardFadeIn 0.5s ease;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);   /* starts 20px below */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+/* ================================================================
+   SECTION 20 — RESPONSIVE DESIGN (Mobile Phones)
+   ----------------------------------------------------------------
+   @media (max-width: 480px) applies ONLY when the screen
+   is 480 pixels wide or narrower — typically a phone.
+   
+   We reduce padding and font sizes slightly on small screens.
+================================================================ */
+
+@media (max-width: 480px) {
+
+  body {
+    padding: 0;                 /* no outer padding on mobile */
+    align-items: stretch;       /* card stretches to fill screen */
+  }
+
+  .app-wrapper {
+    max-width: 100%;            /* full screen width on mobile */
+    min-height: 100vh;          /* full screen height */
+    border-radius: 0;           /* no rounded corners on mobile */
+    box-shadow: none;
+  }
+
+  .app-header {
+    padding: 28px 20px 24px;
+  }
+
+  .app-title {
+    font-size: 1.7rem;
+  }
+
+  .main-content {
+    padding: 20px 16px;
+  }
+
+  .add-btn {
+    padding: 12px 14px;
+    font-size: 0.82rem;
+  }
+
+  /* On mobile (touch screens), there's no hover.
+     So ALWAYS show action buttons — never hide them. */
+  .task-actions {
+    opacity: 1;
+  }
+
+  .task-list {
+    max-height: none;           /* no scroll limit on mobile */
+  }
+}
